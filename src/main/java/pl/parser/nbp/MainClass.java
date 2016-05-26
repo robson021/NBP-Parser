@@ -1,5 +1,6 @@
 package pl.parser.nbp;
 
+import java.net.MalformedURLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -14,7 +15,7 @@ public class MainClass {
     private static Date dateFrom;
     private static Date dateTo;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws MalformedURLException {
         if (args.length != 3) {
             System.out.println("Bad input");
             return;
@@ -33,11 +34,12 @@ public class MainClass {
             return;
         }
 
-        System.out.println(currencyCode);
+        /*System.out.println(currencyCode);
         System.out.println(dateFrom.toString());
-        System.out.println(dateTo.toString());
+        System.out.println(dateTo.toString());*/
 
         parser.initDateList(dateFrom, dateTo);
+        parser.checkFileName();
 
 
     }
