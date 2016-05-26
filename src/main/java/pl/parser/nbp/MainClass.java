@@ -24,7 +24,7 @@ public class MainClass {
             DateFormat format = new SimpleDateFormat("yyyy-mm-dd", Locale.ENGLISH);
             dateFrom = format.parse(args[1]);
             dateTo = format.parse(args[2]);
-            if (dateFrom.after(dateTo)) {
+            if (dateFrom.after(dateTo) || dateFrom.getYear() != dateTo.getYear()) {
                 System.out.println("Invalid date");
                 return;
             }
@@ -42,5 +42,7 @@ public class MainClass {
         parser.getListOfContent();
         parser.parseListOfContent();
 
+
+        //System.out.println("done");
     }
 }
