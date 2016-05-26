@@ -40,7 +40,7 @@ public class MainClass {
         parser.initDateList(dateFrom, dateTo);
         parser.checkUrlToSearch();
         parser.getListOfContent();
-        parser.parseListOfContent();
+        parser.parseListOfContent(currencyCode);
 
 
         //System.out.println("done");

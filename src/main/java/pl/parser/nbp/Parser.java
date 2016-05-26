@@ -1,7 +1,12 @@
 package pl.parser.nbp;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -11,8 +16,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class Parser {
     private static final String CURRENT_YEAR_URL = "http://www.nbp.pl/kursy/xml/dir.txt";
-    private static final String URL_1 = "http://www.nbp.pl/kursy/xml/dir";
-    private static final String URL_2 = ".txt";
+    private static final String URL_PREFIX = "http://www.nbp.pl/kursy/xml/dir";
+    private static final String URL_SUFIX = ".txt";
     private static final String XML_URL = "http://www.nbp.pl/kursy/xml/"; // + "########.xml"
 
     private List<Date> dateList = new ArrayList<>();
@@ -34,22 +39,17 @@ public class Parser {
             dateList.add(c.getTime());
             c.add(Calendar.DATE, 1);
         }
-
-        /*for (Date d : dateList) {
-            System.out.println(d.toString());
-        }*/
-
     }
 
-    public void checkUrlToSearch() throws MalformedURLException {
+    public void checkUrlToSearch() throws Exception {
         if (dateList.isEmpty()) {
-            throw new RuntimeException("Nothing to search for. The list is empty.");
+            throw new Exception("Nothing to search for. The list is empty.");
         }
         int year = dateList.get(0).getYear() + 1900;
-        if (year == Calendar.getInstance().getTime().getYear()) {
+        if (year == (Calendar.getInstance().getTime().getYear() + 1900)) {
             url = new URL(CURRENT_YEAR_URL);
         } else {
-            url = new URL(URL_1 + year + URL_2);
+            url = new URL(URL_PREFIX + year + URL_SUFIX);
         }
     }
 
@@ -104,8 +104,72 @@ public class Parser {
         return false;
     }
 
-    public void parseListOfContent() {
-        // TODO: 26.05.16
+
+    /**
+     * Parses XML documents. <br>
+     * See: http://www.tutorialspoint.com/java_xml/java_dom_parser.htm
+     *
+     * @param currencyCode The code of the currency you want to find (@see pl.parser.nbp.Currency).
+     */
+    public void parseListOfContent(Currency currencyCode) {
+        List<BuyAndSell> buyAndSellList = new ArrayList<>();
+        for (String fileName : fileNameList) {
+            Document doc = this.loadDocument(XML_URL + fileName + ".xml");
+            if (doc == null) continue;
+            doc.getDocumentElement().normalize();
+            //System.out.println("Root element: " + doc.getDocumentElement().getNodeName());
+            NodeList nList = doc.getElementsByTagName("pozycja");
+            for (int i = 0; i < nList.getLength(); i++) {
+                Node nNode = nList.item(i);
+                //System.out.println("\nCurrent Element: " + nNode.getNodeName());
+                if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+                    Element e = (Element) nNode;
+                    String code = e.getElementsByTagName("kod_waluty").item(0).getTextContent();
+                    if (currencyCode.toString().equals(code)) {
+                        double buy = Double.parseDouble(e.getElementsByTagName("kurs_kupna").item(0).getTextContent().replace(',', '.'));
+                        double sell = Double.parseDouble(e.getElementsByTagName("kurs_sprzedazy").item(0).getTextContent().replace(',', '.'));
+                        //System.out.println(buy + "; " + sell);
+                        buyAndSellList.add(new BuyAndSell(buy, sell));
+                    }
+                }
+            }
+        }
+        //System.out.println(buyAndSellList.toString());
+    }
+
+    private Document loadDocument(String url) {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(true);
+        try {
+            return factory.newDocumentBuilder().parse(new URL(url).openStream());
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private class BuyAndSell {
+        private final double buy, sell;
+
+        public BuyAndSell(double buy, double sell) {
+            this.buy = buy;
+            this.sell = sell;
+        }
+
+        public double getBuy() {
+            return buy;
+        }
+
+        public double getSell() {
+            return sell;
+        }
+
+        @Override
+        public String toString() {
+            return "BuyAndSell{" +
+                    "buy=" + buy +
+                    ", sell=" + sell +
+                    '}';
+        }
     }
 
 }
