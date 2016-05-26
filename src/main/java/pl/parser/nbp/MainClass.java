@@ -43,6 +43,6 @@ public class MainClass {
         parser.parseListOfContent(currencyCode);
 
         System.out.printf("%.4f%n", parser.getLastAvgBuyPrice());
-        System.out.printf("%.4f%n", parser.getLastStandardDeviation());
+        System.out.printf("%.4f%n", parser.getLastSellStandardDeviation());
     }
 }

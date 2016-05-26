@@ -177,7 +177,7 @@ public class Parser {
         return lastAvgBuyPrice;
     }
 
-    public double getLastStandardDeviation() {
+    public double getLastSellStandardDeviation() {
         return lastStandardDeviation;
     }
 
