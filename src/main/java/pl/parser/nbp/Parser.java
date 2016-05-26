@@ -104,4 +104,8 @@ public class Parser {
         return false;
     }
 
+    public void parseListOfContent() {
+        // TODO: 26.05.16
+    }
+
 }
