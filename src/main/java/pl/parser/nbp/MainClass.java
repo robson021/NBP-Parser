@@ -10,15 +10,15 @@ import java.util.Locale;
  */
 public class MainClass {
     private static final Parser parser = new Parser();
-    private static Currency currencyCode;
-    private static Date dateFrom;
-    private static Date dateTo;
 
     public static void main(String[] args) throws Exception {
         if (args.length != 3) {
             System.out.println("Bad input");
             return;
         }
+        Currency currencyCode;
+        Date dateFrom;
+        Date dateTo;
         try {
             currencyCode = Currency.valueOf(args[0]);
             DateFormat format = new SimpleDateFormat("yyyy-mm-dd", Locale.ENGLISH);
@@ -38,11 +38,11 @@ public class MainClass {
         System.out.println(dateTo.toString());*/
 
         parser.initDateList(dateFrom, dateTo);
-        parser.checkUrlToSearch();
+        parser.generateUrlToSearch();
         parser.getListOfContent();
         parser.parseListOfContent(currencyCode);
 
-
-        //System.out.println("done");
+        System.out.printf("%.4f%n", parser.getLastAvgBuyPrice());
+        System.out.printf("%.4f%n", parser.getLastStandardDeviation());
     }
 }

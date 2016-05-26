@@ -20,13 +20,14 @@ public class Parser {
     private static final String URL_SUFIX = ".txt";
     private static final String XML_URL = "http://www.nbp.pl/kursy/xml/"; // + "########.xml"
 
-    private List<Date> dateList = new ArrayList<>();
+    private double lastAvgBuyPrice;
+    private double lastStandardDeviation;
+
+    private List<Date> dateList;
     private List<String> patterns;
     private List<String> fileNameList;
     private URL url;
 
-    public Parser() {
-    }
 
     public void initDateList(Date from, Date to) {
         long diff = to.getTime() - from.getTime();
@@ -35,13 +36,14 @@ public class Parser {
         Calendar c = Calendar.getInstance();
         c.setTime(from);
 
+        dateList = new ArrayList<>();
         for (int i = 0; i < days; i++) {
             dateList.add(c.getTime());
             c.add(Calendar.DATE, 1);
         }
     }
 
-    public void checkUrlToSearch() throws Exception {
+    public void generateUrlToSearch() throws Exception {
         if (dateList.isEmpty()) {
             throw new Exception("Nothing to search for. The list is empty.");
         }
@@ -92,16 +94,13 @@ public class Parser {
                 fileNameList.add(line);
             }
         }
-
         patterns = null;
         sc.close();
     }
 
     private boolean matchPattern(String line) {
         String substr = line.substring(line.length() - 6);
-        if (line.charAt(0) == 'c' && patterns.contains(substr))
-            return true;
-        return false;
+        return line.charAt(0) == 'c' && patterns.contains(substr);
     }
 
 
@@ -135,6 +134,33 @@ public class Parser {
             }
         }
         //System.out.println(buyAndSellList.toString());
+        calculateAvgBuyPrice(buyAndSellList);
+        calculateStandardDeviation(buyAndSellList);
+    }
+
+    private void calculateStandardDeviation(List<BuyAndSell> buyAndSellList) {
+        if (buyAndSellList.isEmpty()) return;
+        double avg = 0;
+        for (BuyAndSell bs : buyAndSellList) {
+            avg += bs.getSell();
+        }
+        avg /= buyAndSellList.size();
+        double v = 0;
+        for (BuyAndSell bs : buyAndSellList) {
+            double a = bs.getSell();
+            v += (avg - a) * (avg - a);
+        }
+        v /= buyAndSellList.size();
+        this.lastStandardDeviation = Math.sqrt(v);
+    }
+
+    private void calculateAvgBuyPrice(List<BuyAndSell> buyAndSellList) {
+        if (buyAndSellList.isEmpty()) return;
+        double sum = 0;
+        for (BuyAndSell bs : buyAndSellList) {
+            sum += bs.getBuy();
+        }
+        this.lastAvgBuyPrice = sum / buyAndSellList.size();
     }
 
     private Document loadDocument(String url) {
@@ -145,6 +171,14 @@ public class Parser {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public double getLastAvgBuyPrice() {
+        return lastAvgBuyPrice;
+    }
+
+    public double getLastStandardDeviation() {
+        return lastStandardDeviation;
     }
 
     private class BuyAndSell {
