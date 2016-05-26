@@ -13,7 +13,7 @@ public class Parser {
     private static final String CURRENT_YEAR_URL = "http://www.nbp.pl/kursy/xml/dir.txt";
     private static final String URL_1 = "http://www.nbp.pl/kursy/xml/dir";
     private static final String URL_2 = ".txt";
-    private static final String XML_URL = "http://www.nbp.pl/kursy/xml/c073z070413";
+    private static final String XML_URL = "http://www.nbp.pl/kursy/xml/"; // + "########.xml"
 
     private List<Date> dateList = new ArrayList<>();
     private List<String> patterns;
@@ -81,9 +81,10 @@ public class Parser {
             pattern += yy + mm + dd;
             patterns.add(pattern);
         }
-        Scanner sc;
-        sc = new Scanner(url.openStream());
+
+        Scanner sc = new Scanner(url.openStream());
         fileNameList = new ArrayList<>();
+
         while (sc.hasNext()) {
             line = sc.nextLine();
             if (matchPattern(line)) {
@@ -91,6 +92,7 @@ public class Parser {
                 fileNameList.add(line);
             }
         }
+
         patterns = null;
         sc.close();
     }
